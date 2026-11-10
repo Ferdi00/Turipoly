@@ -19,10 +19,47 @@
     </script>
     <script src="game-engine.js" defer>
     </script>
+    <script src="game-motion.js" defer>
+    </script>
     <script src="game.js" defer>
     </script>
   </head>
   <body>
+    <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <symbol id="icon-door" viewBox="0 0 24 24"><path d="M4 21h16M7 21V4l10-2v19M13 12h.01"/></symbol>
+        <symbol id="icon-window" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M12 3v18M4 12h16"/></symbol>
+        <symbol id="icon-coffee" viewBox="0 0 24 24"><path d="M4 8h12v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4ZM16 9h2a3 3 0 0 1 0 6h-2M3 22h16M7 2v2M12 2v2"/></symbol>
+        <symbol id="icon-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4M6 7h6"/></symbol>
+        <symbol id="icon-printer" viewBox="0 0 24 24"><path d="M6 8V2h12v6M6 17H3V8h18v9h-3M6 14h12v8H6ZM17 11h.01M9 18h6"/></symbol>
+        <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6M17 2v6M3 11h18M8 15h3M8 18h6"/></symbol>
+        <symbol id="icon-team" viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M3 21v-4a6 6 0 0 1 12 0v4M16 4a3 3 0 0 1 0 6M21 21v-4a6 6 0 0 0-3-5"/></symbol>
+        <symbol id="icon-home" viewBox="0 0 24 24"><path d="m2 11 10-9 10 9M5 9v12h14V9M9 21v-7h6v7"/></symbol>
+        <symbol id="icon-snack" viewBox="0 0 24 24"><path d="M21 11a5 5 0 0 1-7-8 9 9 0 1 0 7 8ZM7 10h.01M8 16h.01M13 14h.01"/></symbol>
+        <symbol id="icon-car" viewBox="0 0 24 24"><path d="m5 7 2-4h10l2 4M3 11l2-4h14l2 4v8H3ZM6 19v3M18 19v3M6 13h2M16 13h2"/></symbol>
+        <symbol id="icon-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V3h8v4M2 12a24 24 0 0 0 20 0M12 12v4"/></symbol>
+        <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></symbol>
+        <symbol id="icon-message" viewBox="0 0 24 24"><path d="M3 3h18v13H9l-6 5ZM7 7h10M7 11h6"/></symbol>
+        <symbol id="icon-snow" viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10M9 4l3 3 3-3M9 20l3-3 3 3M4 10l4-1-1-4M20 14l-4 1 1 4M7 19l1-4-4-1M17 5l-1 4 4 1"/></symbol>
+        <symbol id="icon-key" viewBox="0 0 24 24"><circle cx="7" cy="8" r="5"/><path d="m11 12 10 10M15 16l3-3M18 19l3-3"/></symbol>
+        <symbol id="icon-lunch" viewBox="0 0 24 24"><path d="M4 2v7a3 3 0 0 0 6 0V2M7 2v20M20 22V2c-5 3-6 7-6 11h6"/></symbol>
+        <symbol id="icon-bulb" viewBox="0 0 24 24"><path d="M9 18h6M9 22h6M8 14a7 7 0 1 1 8 0l-1 4H9ZM12 5v3"/></symbol>
+        <symbol id="icon-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="m9 12 2 2 4-4"/></symbol>
+        <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4 4l2 2M18 18l2 2M4 20l2-2M18 6l2-2"/></symbol>
+        <symbol id="icon-chair" viewBox="0 0 24 24"><path d="M6 13V5a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v8M4 12v5h16v-5M12 17v5M7 22h10"/></symbol>
+        <symbol id="icon-coins" viewBox="0 0 24 24"><ellipse cx="9" cy="6" rx="6" ry="3"/><path d="M3 6v5c0 4 12 4 12 0V6M3 11v5c0 4 12 4 12 0v-5M15 8c8 0 8 6 0 6M21 11v6c0 3-4 5-8 4"/></symbol>
+        <symbol id="icon-building" viewBox="0 0 24 24"><path d="M4 22V3h16v19M1 22h22M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2M10 22v-4h4v4"/></symbol>
+        <symbol id="icon-receipt" viewBox="0 0 24 24"><path d="M5 2h14v20l-3-2-4 2-4-2-3 2ZM8 7h8M8 11h8M8 15h4"/></symbol>
+        <symbol id="icon-leaf" viewBox="0 0 24 24"><path d="M20 2C4 2 1 9 6 16s15 1 14-14ZM3 22 17 7"/></symbol>
+        <symbol id="icon-waves" viewBox="0 0 24 24"><path d="M2 7c3-5 7 5 10 0s7 5 10 0M2 13c3-5 7 5 10 0s7 5 10 0M2 19c3-5 7 5 10 0s7 5 10 0"/></symbol>
+        <symbol id="icon-trend" viewBox="0 0 24 24"><path d="m3 17 7-7 4 4 7-10M14 4h7v7M3 22h18"/></symbol>
+        <symbol id="icon-party" viewBox="0 0 24 24"><path d="m3 21 5-16 11 11ZM6 12l7 7M14 2v3M19 7h3M19 1l-2 3M22 12l-3-1"/></symbol>
+        <symbol id="icon-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 5 10 8L22 5"/></symbol>
+        <symbol id="icon-tie" viewBox="0 0 24 24"><path d="m8 2 4 4 4-4ZM10 6l-3 12 5 4 5-4-3-12"/></symbol>
+        <symbol id="icon-motion" viewBox="0 0 24 24"><path d="m13 3 8 9-8 9M4 6h5M2 12h8M4 18h5"/></symbol>
+        <symbol id="icon-dice" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01"/></symbol>
+      </defs>
+    </svg>
     <a class="skip-link" href="#turn-controls">
       Vai ai comandi di gioco
     </a>
@@ -95,19 +132,14 @@
           <div class="board-wrap" id="board-wrap" tabindex="0" role="region" aria-label="Tabellone. Se ingrandito, scorri per esplorarlo.">
             <div class="board" id="board" role="group" aria-label="40 caselle, in senso orario dall’ingresso in basso a destra">
               <div class="board-center">
-                <img class="center-turi" src="turi-logo.webp" width="120" height="120" alt="Turi, il capo dell’ufficio">
-                <div class="center-logo" aria-hidden="true">
-                  TURI
-                  <span>
-                    POLY
-                  </span>
+                <div class="desk-note deadline-note" aria-hidden="true"><span>URGENTE</span><strong>Per ieri.</strong><i></i></div>
+                <div class="desk-note coffee-note" aria-hidden="true"><svg class="ui-icon"><use href="#icon-coffee"/></svg><span>Prima il caffè.<br>Poi la call.</span></div>
+                <div class="brand-sheet">
+                  <img class="center-turi" src="turi-logo.webp" width="120" height="120" alt="Turi, il capo dell’ufficio">
+                  <div class="center-logo" aria-hidden="true">TURI<span>POLY</span></div>
+                  <p class="center-tagline">UN ALTRO GIORNO.<br>UN’ALTRA RIUNIONE.</p>
                 </div>
-                <p class="center-tagline">
-                  UN ALTRO GIORNO.
-                  <br>
-                  UN’ALTRA RIUNIONE.
-                </p>
-                <div class="center-turn">
+                <div class="center-turn" id="center-turn-ticket">
                   <span id="center-caption">
                     L’ufficio ti aspetta
                   </span>
@@ -118,6 +150,8 @@
                     Si parte dall’ingresso.
                   </p>
                 </div>
+                <div class="desk-deck" aria-hidden="true"><svg class="ui-icon"><use href="#icon-mail"/></svg><span>IMPREVISTI</span></div>
+                <div id="office-stamp" class="office-stamp" aria-hidden="true"><span>UFFICIO DI TURI</span><strong id="stamp-text">SI TIMBRA</strong><span>PRATICA APPROVATA</span></div>
                 <p class="board-tip">
                   Seleziona una casella
                   <br>
@@ -146,6 +180,7 @@
               ★ Potenziamento
             </span>
           </p>
+          <div class="game-preferences"><span>Si gioca sul serio. Più o meno.</span><button id="motion-toggle" class="text-button" type="button" aria-pressed="true"><svg class="ui-icon" aria-hidden="true"><use href="#icon-motion"/></svg><span id="motion-label">Animazioni attive</span></button></div>
         </div>
         <aside class="sidebar">
           <section class="panel turn-panel" id="turn-controls" tabindex="-1" aria-labelledby="turn-title">
@@ -243,6 +278,7 @@
     </noscript>
     <dialog id="setup-dialog" aria-labelledby="setup-title" aria-describedby="setup-description">
       <form id="setup-form">
+        <div class="setup-brand" aria-hidden="true"><img src="turi-logo.webp" width="48" height="48" alt=""><span>TURIPOLY<span>UFFICIO RISORSE UMANE</span></span></div>
         <div class="dialog-heading">
           <h2 id="setup-title">
             Chi viene in ufficio?
@@ -470,6 +506,7 @@
       </button>
     </dialog>
     <dialog id="result-dialog" aria-labelledby="result-title">
+      <div class="result-seal" aria-hidden="true"><svg class="ui-icon"><use href="#icon-tie"/></svg><span>IMPIEGATO DEL MESE</span></div>
       <div class="dialog-heading">
         <h2 id="result-title">
           L’ufficio ha un vincitore
