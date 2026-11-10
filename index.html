@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f1e8">
+  <meta name="description" content="Turipoly: il Monopoly dell'ufficio. Tira i dadi, compra le caselle e sopravvivi alla settimana lavorativa.">
+  <link rel="icon" type="image/png" href="turi-logo.png">
+  <title>Turipoly — Il Monopoly dell'ufficio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+  <script src="event-cards.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Turipoly, inizio"><span class="brand-mark"><img src="turi-logo.png" alt="Turi"></span><span>TURIPOLY<small>IL MONOPOLY DELL'UFFICIO</small></span></a>
+    <div class="top-note"><span class="live-dot"></span> EDIZIONE UFFICIO · 2026</div>
+    <button id="new-game" class="button button-quiet" type="button">↻ <span>Nuova partita</span></button>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div><p class="eyebrow">LA RIUNIONE POTEVA ESSERE UN'EMAIL</p><h1>Benvenuti in <span>ufficio.</span></h1><p class="intro-copy">Compra le postazioni migliori, evita le riunioni del venerdì e cerca di arrivare a fine mese con ancora qualche euro.</p></div>
+      <div class="boss-stamp"><img class="stamp-icon turi-stamp" src="turi-logo.png" alt="Turi"><span>IL CAPO È</span><strong>Turi</strong><small>Salvatore Mnfrè</small></div>
+    </section>
+
+    <section class="game-layout" aria-label="Partita di Turipoly">
+      <div class="board-wrap">
+        <div class="board" id="board" aria-label="Tabellone di Turipoly">
+          <div class="board-center">
+            <div class="center-topline"><span>LA VITA</span><span>·</span><span>IN UFFICIO</span></div>
+            <img class="center-turi" src="turi-logo.png" alt="Turi, il capo dell'ufficio">
+            <div class="center-logo"><span class="logo-star">✳</span><span>TURI<br><b>POLY</b></span></div>
+            <p class="center-tagline">UN ALTRO GIORNO,<br>UN'ALTRA RIUNIONE.</p>
+            <div class="center-rule"></div>
+            <p class="turn-caption">È IL TURNO DI</p>
+            <p id="center-player" class="center-player">Turi</p>
+            <div class="dice-display" id="dice-display" aria-live="polite"><span>⚄</span><span>⚄</span></div>
+            <button id="roll-dice" class="button button-roll" type="button"><span>🎲</span> TIRA I DADI</button>
+            <p id="center-hint" class="center-hint">Che la settimana lavorativa abbia inizio.</p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <section class="panel players-panel">
+          <div class="panel-heading"><div><p class="eyebrow">CHI SOPRAVVIVRÀ?</p><h2>La squadra</h2></div><button id="add-player" class="icon-button" type="button" aria-label="Aggiungi giocatore" title="Aggiungi giocatore">＋</button></div>
+          <div id="players-list" class="players-list"></div>
+          <p class="small-note">Clicca sul nome per cambiarlo. Fino a 4 colleghi.</p>
+        </section>
+
+        <section class="panel turn-panel">
+          <div class="panel-heading"><div><p class="eyebrow">SITUAZIONE ATTUALE</p><h2>Diario di bordo</h2></div><span class="notebook-icon">▤</span></div>
+          <div id="status-card" class="status-card"><span class="status-emoji">☕</span><div><strong>Il lunedì è iniziato</strong><p>Tira i dadi per fare la tua prima mossa.</p></div></div>
+          <div class="log-heading"><span>ULTIMI AVVENIMENTI</span><span>LIVE</span></div>
+          <ol id="activity-log" class="activity-log" aria-live="polite"><li><span class="log-dot"></span><span>La partita è pronta. Chi lancia per primo?</span><time>ora</time></li></ol>
+        </section>
+
+        <section class="legend"><span><i class="legend-dot dot-green"></i> Postazione</span><span><i class="legend-dot dot-yellow"></i> Imprevisto</span><span><i class="legend-dot dot-red"></i> Guai</span></section>
+        <p class="disclaimer">Un gioco tra colleghi. Ogni somiglianza con riunioni reali è assolutamente voluta.</p>
+      </aside>
+    </section>
+    <footer>FATTO CON ☕ E UNA RIUNIONE DI TROPPO <span>·</span> TURIPOLY © 2026</footer>
+  </main>
+
+  <dialog id="choice-dialog" class="choice-dialog">
+    <div class="dialog-icon" id="dialog-icon">🏢</div><p class="eyebrow">OCCASIONE DI LAVORO</p><h2 id="dialog-title">Vuoi comprare?</h2><p id="dialog-description"></p>
+    <div class="dialog-actions"><button id="decline-buy" class="button button-quiet" type="button">Passo</button><button id="confirm-buy" class="button button-roll" type="button">La compro</button></div>
+  </dialog>
+    <dialog id="event-dialog" class="event-dialog" aria-labelledby="event-title">
+      <article class="event-card" id="event-card">
+        <div class="event-card-top"><span id="event-label">IMPREVISTO</span><span>★ TURIPOLY ★</span></div>
+        <div class="event-card-art" id="event-art" aria-hidden="true">🎲</div>
+        <p class="event-card-kicker">DAL DIARIO DI UFFICIO</p>
+        <h2 id="event-title">Una sorpresa ti aspetta</h2>
+        <p class="event-card-copy" id="event-copy"></p>
+        <div class="event-card-result" id="event-result"></div>
+        <button id="event-continue" class="button button-roll" type="button">CONTINUA <span aria-hidden="true">→</span></button>
+        <span class="event-card-number">T · <span id="event-number">01</span></span>
+      </article>
+    </dialog>
+</body>
+</html>
