@@ -12,7 +12,7 @@ node scripts/serve.cjs
 
 Apri **http://127.0.0.1:4173**. In alternativa, con npm disponibile: `npm start`.
 
-Per pubblicare su GitHub Pages: Settings → Pages → Deploy from a branch → scegli il branch e `/ (root)`. Pubblica tutti i file dell’app, inclusi `game-data.js`, `event-cards.js`, `game-engine.js` e `turi-logo.webp`. Non serve eseguire una build.
+Per pubblicare su GitHub Pages: Settings → Pages → Deploy from a branch → scegli il branch e `/ (root)`. Pubblica tutti i file dell'app, inclusi `game-data.js`, `event-cards.js`, `game-engine.js`, `game-motion.js` e `turi-logo.webp`. Non serve eseguire una build.
 
 ## Regole
 
@@ -39,7 +39,15 @@ Usa lo **stesso dispositivo, browser e indirizzo** per ritrovare il salvataggio.
 
 Seleziona una casella per leggere nome completo, proprietario, prezzo e affitti. Su telefono i comandi vengono prima del tabellone. Il tabellone compatto è una panoramica; **Ingrandisci tabellone** permette di leggere le caselle scorrendo al suo interno. I dettagli restano sempre disponibili.
 
-Si può giocare da tastiera: Tab per i comandi; frecce per le caselle in ordine di percorso; Home/End per la prima/ultima casella; Invio o Spazio per i pulsanti. Escape chiude i pannelli, rinuncia all’acquisto e lascia aperte le carte da confermare. Le animazioni rispettano la preferenza di movimento ridotto.
+Si può giocare da tastiera: Tab per i comandi; frecce per le caselle in ordine di percorso; Home/End per la prima/ultima casella; Invio o Spazio per i pulsanti. Escape chiude i pannelli, rinuncia all'acquisto e lascia aperte le carte da confermare.
+
+## Grafica e animazioni
+
+Il tabellone richiama una scrivania verde, con pratiche, appunti, timbri e pedine a forma di badge. Le caselle usano icone SVG coerenti; i dadi mostrano i punti della faccia estratta.
+
+Il tiro segue una sequenza: lancio dei dadi, percorso della pedina casella per casella, poi apertura della carta o scelta di acquisto. Le altre azioni mostrano timbri e ricevute temporanee per incassi e spese; il passaggio di turno aggiorna il cartellino del collega. La vittoria ha una breve pioggia di coriandoli di carta. Non ci sono animazioni decorative continue o suoni automatici.
+
+Il comando **Animazioni attive / Animazioni ridotte**, sotto il tabellone, conserva la preferenza sul browser. La preferenza di movimento ridotto del dispositivo ha la precedenza. Ridurre gli effetti durante un tiro o cambiare scheda interrompe la presentazione e completa il turno con l'esito già salvato. Senza movimento restano visibili risultato dei dadi, saldi, timbri e messaggi.
 
 ## Sviluppo e test
 
@@ -47,17 +55,19 @@ Si può giocare da tastiera: Tab per i comandi; frecce per le caselle in ordine 
 node --test tests/*.test.cjs
 ```
 
-Oppure `npm run check`, che verifica anche la sintassi dei quattro script. I test coprono le regole economiche, i passaggi di turno, gli eventi, il ripristino dei salvataggi e 60 partite complete con semi riproducibili.
+Oppure `npm run check`, che verifica anche la sintassi dei cinque script. I 36 test coprono le regole economiche, i passaggi di turno, gli eventi, il ripristino dei salvataggi, il percorso e l'interruzione delle animazioni e 60 partite complete con semi riproducibili.
 
 | File | Responsabilità |
 | --- | --- |
 | `game-data.js` | Caselle, prezzi, affitti, colori e gruppi |
 | `event-cards.js` | Testi e conseguenze delle carte |
 | `game-engine.js` | Regole e stato, utilizzabile anche nei test Node |
+| `game-motion.js` | Percorsi, animazioni e annullamento degli effetti |
 | `game.js` | Interfaccia, input, dialoghi e salvataggio |
 | `style.css` | Stile e adattamento a schermi diversi |
 | `scripts/serve.cjs` | Server statico locale senza dipendenze |
 | `tests/game-engine.test.cjs` | Regressioni delle meccaniche e simulazioni |
+| `tests/game-motion.test.cjs` | Percorsi, movimento ridotto e pulizia degli effetti interrotti |
 
 Il logo originale PNG rimane come sorgente; la pagina carica la versione WebP ridimensionata. I font Google sono facoltativi: se non disponibili, si usano quelli di sistema. Il gioco è esclusivamente locale: non include multiplayer online, aste, scambi tra giocatori o account.
 
