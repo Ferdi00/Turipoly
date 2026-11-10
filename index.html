@@ -1,86 +1,492 @@
 <!doctype html>
 <html lang="it">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f4f1e8">
-  <meta name="description" content="Turipoly: il Monopoly dell'ufficio. Tira i dadi, compra le caselle e sopravvivi alla settimana lavorativa.">
-  <link rel="icon" type="image/png" href="turi-logo.png">
-  <title>Turipoly — Il Monopoly dell'ufficio</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <script src="game.js" defer></script>
-  <script src="event-cards.js" defer></script>
-</head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="#" aria-label="Turipoly, inizio"><span class="brand-mark"><img src="turi-logo.png" alt="Turi"></span><span>TURIPOLY<small>IL MONOPOLY DELL'UFFICIO</small></span></a>
-    <div class="top-note"><span class="live-dot"></span> EDIZIONE UFFICIO · 2026</div>
-    <button id="new-game" class="button button-quiet" type="button">↻ <span>Nuova partita</span></button>
-  </header>
-
-  <main>
-    <section class="intro">
-      <div><p class="eyebrow">LA RIUNIONE POTEVA ESSERE UN'EMAIL</p><h1>Benvenuti in <span>ufficio.</span></h1><p class="intro-copy">Compra le postazioni migliori, evita le riunioni del venerdì e cerca di arrivare a fine mese con ancora qualche euro.</p></div>
-      <div class="boss-stamp"><img class="stamp-icon turi-stamp" src="turi-logo.png" alt="Turi"><span>IL CAPO È</span><strong>Turi</strong><small>Salvatore Mnfrè</small></div>
-    </section>
-
-    <section class="game-layout" aria-label="Partita di Turipoly">
-      <div class="board-wrap">
-        <div class="board" id="board" aria-label="Tabellone di Turipoly">
-          <div class="board-center">
-            <div class="center-topline"><span>LA VITA</span><span>·</span><span>IN UFFICIO</span></div>
-            <img class="center-turi" src="turi-logo.png" alt="Turi, il capo dell'ufficio">
-            <div class="center-logo"><span class="logo-star">✳</span><span>TURI<br><b>POLY</b></span></div>
-            <p class="center-tagline">UN ALTRO GIORNO,<br>UN'ALTRA RIUNIONE.</p>
-            <div class="center-rule"></div>
-            <p class="turn-caption">È IL TURNO DI</p>
-            <p id="center-player" class="center-player">Turi</p>
-            <div class="dice-display" id="dice-display" aria-live="polite"><span>⚄</span><span>⚄</span></div>
-            <button id="roll-dice" class="button button-roll" type="button"><span>🎲</span> TIRA I DADI</button>
-            <p id="center-hint" class="center-hint">Che la settimana lavorativa abbia inizio.</p>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fff7df">
+    <meta name="description" content="Turipoly, il gioco da tavolo dell’ufficio: conquista le postazioni, completa i gruppi e sopravvivi alle riunioni di Turi. Da 2 a 4 giocatori sullo stesso dispositivo.">
+    <link rel="icon" type="image/webp" href="turi-logo.webp">
+    <title>
+      Turipoly — Il gioco dell’ufficio
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="game-data.js" defer>
+    </script>
+    <script src="event-cards.js" defer>
+    </script>
+    <script src="game-engine.js" defer>
+    </script>
+    <script src="game.js" defer>
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#turn-controls">
+      Vai ai comandi di gioco
+    </a>
+    <header class="topbar">
+      <a class="brand" href="#main" aria-label="Turipoly, inizio">
+        <img src="turi-logo.webp" width="44" height="44" alt="">
+        <span>
+          TURIPOLY
+          <small>
+            IL GIOCO DELL’UFFICIO
+          </small>
+        </span>
+      </a>
+      <span class="top-note">
+        La riunione poteva essere un’email.
+      </span>
+      <nav aria-label="Comandi partita">
+        <button id="rules" class="button button-quiet" type="button">
+          Come si gioca
+        </button>
+        <button id="new-game" class="button button-outline" type="button">
+          Nuova partita
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <h1 id="page-title">
+            Benvenuti in
+            <span>
+              ufficio.
+            </span>
+          </h1>
+          <p>
+            Le postazioni migliori sono ancora libere. Le riunioni, purtroppo, no.
+          </p>
+        </div>
+        <div class="boss-stamp">
+          <img src="turi-logo.webp" width="52" height="52" alt="Turi">
+          <div>
+            Il capo è
+            <strong>
+              Turi.
+            </strong>
+            <small>
+              Buon lavoro. Più o meno.
+            </small>
           </div>
         </div>
+      </section>
+      <div class="session-bar">
+        <p id="round-label">
+          La squadra sta arrivando…
+        </p>
+        <span id="save-status" role="status">
+          Partita locale · 2–4 colleghi
+        </span>
       </div>
-
-      <aside class="sidebar">
-        <section class="panel players-panel">
-          <div class="panel-heading"><div><p class="eyebrow">CHI SOPRAVVIVRÀ?</p><h2>La squadra</h2></div><button id="add-player" class="icon-button" type="button" aria-label="Aggiungi giocatore" title="Aggiungi giocatore">＋</button></div>
-          <div id="players-list" class="players-list"></div>
-          <p class="small-note">Clicca sul nome per cambiarlo. Fino a 4 colleghi.</p>
-        </section>
-
-        <section class="panel turn-panel">
-          <div class="panel-heading"><div><p class="eyebrow">SITUAZIONE ATTUALE</p><h2>Diario di bordo</h2></div><span class="notebook-icon">▤</span></div>
-          <div id="status-card" class="status-card"><span class="status-emoji">☕</span><div><strong>Il lunedì è iniziato</strong><p>Tira i dadi per fare la tua prima mossa.</p></div></div>
-          <div class="log-heading"><span>ULTIMI AVVENIMENTI</span><span>LIVE</span></div>
-          <ol id="activity-log" class="activity-log" aria-live="polite"><li><span class="log-dot"></span><span>La partita è pronta. Chi lancia per primo?</span><time>ora</time></li></ol>
-        </section>
-
-        <section class="legend"><span><i class="legend-dot dot-green"></i> Postazione</span><span><i class="legend-dot dot-yellow"></i> Imprevisto</span><span><i class="legend-dot dot-red"></i> Guai</span></section>
-        <p class="disclaimer">Un gioco tra colleghi. Ogni somiglianza con riunioni reali è assolutamente voluta.</p>
-      </aside>
-    </section>
-    <footer>FATTO CON ☕ E UNA RIUNIONE DI TROPPO <span>·</span> TURIPOLY © 2026</footer>
-  </main>
-
-  <dialog id="choice-dialog" class="choice-dialog">
-    <div class="dialog-icon" id="dialog-icon">🏢</div><p class="eyebrow">OCCASIONE DI LAVORO</p><h2 id="dialog-title">Vuoi comprare?</h2><p id="dialog-description"></p>
-    <div class="dialog-actions"><button id="decline-buy" class="button button-quiet" type="button">Passo</button><button id="confirm-buy" class="button button-roll" type="button">La compro</button></div>
-  </dialog>
-    <dialog id="event-dialog" class="event-dialog" aria-labelledby="event-title">
-      <article class="event-card" id="event-card">
-        <div class="event-card-top"><span id="event-label">IMPREVISTO</span><span>★ TURIPOLY ★</span></div>
-        <div class="event-card-art" id="event-art" aria-hidden="true">🎲</div>
-        <p class="event-card-kicker">DAL DIARIO DI UFFICIO</p>
-        <h2 id="event-title">Una sorpresa ti aspetta</h2>
-        <p class="event-card-copy" id="event-copy"></p>
-        <div class="event-card-result" id="event-result"></div>
-        <button id="event-continue" class="button button-roll" type="button">CONTINUA <span aria-hidden="true">→</span></button>
-        <span class="event-card-number">T · <span id="event-number">01</span></span>
+      <section class="game-layout" aria-label="Partita di Turipoly">
+        <div class="board-column">
+          <div class="board-toolbar">
+            <span>
+              Il tuo ufficio, una casella alla volta.
+            </span>
+            <button id="zoom-board" type="button" class="text-button" aria-pressed="false">
+              Ingrandisci tabellone
+            </button>
+          </div>
+          <div class="board-wrap" id="board-wrap" tabindex="0" role="region" aria-label="Tabellone. Se ingrandito, scorri per esplorarlo.">
+            <div class="board" id="board" role="group" aria-label="40 caselle, in senso orario dall’ingresso in basso a destra">
+              <div class="board-center">
+                <img class="center-turi" src="turi-logo.webp" width="120" height="120" alt="Turi, il capo dell’ufficio">
+                <div class="center-logo" aria-hidden="true">
+                  TURI
+                  <span>
+                    POLY
+                  </span>
+                </div>
+                <p class="center-tagline">
+                  UN ALTRO GIORNO.
+                  <br>
+                  UN’ALTRA RIUNIONE.
+                </p>
+                <div class="center-turn">
+                  <span id="center-caption">
+                    L’ufficio ti aspetta
+                  </span>
+                  <strong id="center-player">
+                    Pronti a timbrare?
+                  </strong>
+                  <p id="center-position">
+                    Si parte dall’ingresso.
+                  </p>
+                </div>
+                <p class="board-tip">
+                  Seleziona una casella
+                  <br>
+                  per scoprirne i dettagli.
+                </p>
+              </div>
+            </div>
+          </div>
+          <p class="board-legend">
+            <span>
+              <i class="legend-dot property-dot">
+              </i>
+              Postazioni
+            </span>
+            <span>
+              <i class="legend-dot event-dot">
+              </i>
+              Imprevisti
+            </span>
+            <span>
+              <i class="legend-dot meeting-dot">
+              </i>
+              Riunione
+            </span>
+            <span>
+              ★ Potenziamento
+            </span>
+          </p>
+        </div>
+        <aside class="sidebar">
+          <section class="panel turn-panel" id="turn-controls" tabindex="-1" aria-labelledby="turn-title">
+            <div class="panel-heading">
+              <h2 id="turn-title">
+                Pronti a iniziare?
+              </h2>
+              <span class="turn-marker" id="turn-marker">
+              </span>
+            </div>
+            <div class="dice-display" id="dice-display" role="img" aria-label="Dadi da tirare">
+              <span class="die">
+                –
+              </span>
+              <span class="die">
+                –
+              </span>
+            </div>
+            <p id="turn-hint" class="turn-hint" aria-live="polite">
+              Riunisci da 2 a 4 colleghi sullo stesso dispositivo.
+            </p>
+            <div class="primary-actions">
+              <button id="roll-dice" class="button button-primary" type="button" disabled>
+                Tira i dadi
+              </button>
+              <button id="end-turn" class="button button-primary" type="button" hidden>
+                Termina il turno
+              </button>
+            </div>
+            <div id="meeting-actions" hidden>
+              <p class="small-note">
+                La riunione ti farà saltare questo tiro.
+              </p>
+              <div class="action-pair">
+                <button id="skip-meeting" class="button button-quiet" type="button">
+                  Resto in riunione
+                </button>
+                <button id="pay-meeting" class="button button-outline" type="button">
+                  Delega · €50
+                </button>
+              </div>
+            </div>
+            <button id="manage-properties" class="button button-outline full-width" type="button" disabled>
+              Le tue postazioni
+            </button>
+            <div id="status-card" class="status-card" role="status">
+              <strong>
+                Lunedì, si ricomincia.
+              </strong>
+              <p>
+                Configura la squadra e conquista l’ufficio.
+              </p>
+            </div>
+          </section>
+          <section class="panel players-panel" aria-labelledby="players-title">
+            <div class="panel-heading">
+              <h2 id="players-title">
+                La squadra
+              </h2>
+              <span id="player-count">
+                2–4 colleghi
+              </span>
+            </div>
+            <div id="players-list">
+              <p class="empty-note">
+                C’è posto per tutti. Almeno all’inizio.
+              </p>
+            </div>
+            <p class="small-note">
+              Patrimonio = liquidità + postazioni + upgrade. Seleziona un nome per modificarlo.
+            </p>
+          </section>
+          <details class="panel log-panel" open>
+            <summary>
+              Diario di bordo
+              <span id="log-count">
+              </span>
+            </summary>
+            <ol id="activity-log" class="activity-log" aria-label="Ultimi avvenimenti">
+            </ol>
+          </details>
+        </aside>
+      </section>
+      <footer>
+        Un gioco tra colleghi. Ogni somiglianza con riunioni reali è assolutamente voluta.
+        <span>
+          TURIPOLY · EDIZIONE UFFICIO
+        </span>
+      </footer>
+    </main>
+    <noscript>
+      <p class="noscript">
+        Per giocare a Turipoly attiva JavaScript nel browser.
+      </p>
+    </noscript>
+    <dialog id="setup-dialog" aria-labelledby="setup-title" aria-describedby="setup-description">
+      <form id="setup-form">
+        <div class="dialog-heading">
+          <h2 id="setup-title">
+            Chi viene in ufficio?
+          </h2>
+          <button class="icon-button" id="close-setup" type="button" aria-label="Torna alla partita" hidden>
+            ×
+          </button>
+        </div>
+        <p id="setup-description">
+          Da 2 a 4 colleghi, un solo dispositivo. Scegliete i nomi e fatevi spazio.
+        </p>
+        <div class="setup-count">
+          <span>
+            La squadra
+          </span>
+          <button id="remove-player" class="icon-button" type="button" aria-label="Rimuovi l’ultimo giocatore">
+            −
+          </button>
+          <output id="setup-count">
+            2 colleghi
+          </output>
+          <button id="add-player" class="icon-button" type="button" aria-label="Aggiungi un giocatore">
+            +
+          </button>
+        </div>
+        <div id="player-fields" class="player-fields">
+        </div>
+        <label class="field-label" for="game-length">
+          Quanto restiamo in ufficio?
+        </label>
+        <select id="game-length">
+          <option value="12">
+            Pausa lunga · 12 round
+          </option>
+          <option value="20">
+            Giornata intera · 20 round
+          </option>
+          <option value="0">
+            Straordinari · fino all’ultimo collega
+          </option>
+        </select>
+        <p class="small-note">
+          Un round = un turno per ogni collega. Alla scadenza vince chi ha il patrimonio più alto. Si parte con €1.500 e ogni giro paga €200.
+        </p>
+        <p id="setup-error" class="form-error" role="alert">
+        </p>
+        <button id="start-game" class="button button-primary full-width" type="submit">
+          Tutti in ufficio
+        </button>
+        <p id="replace-warning" class="small-note" hidden>
+          La partita attuale verrà sostituita solo quando inizi quella nuova.
+        </p>
+      </form>
+    </dialog>
+    <dialog id="choice-dialog" aria-labelledby="choice-title" aria-describedby="choice-description">
+      <span class="property-group" id="choice-group">
+      </span>
+      <h2 id="choice-title">
+        Una postazione libera
+      </h2>
+      <p id="choice-description">
+      </p>
+      <dl class="property-stats" id="choice-stats">
+      </dl>
+      <p id="choice-balance" class="balance-note">
+      </p>
+      <div class="dialog-actions">
+        <button id="decline-buy" class="button button-quiet" type="button">
+          Lascio ai colleghi
+        </button>
+        <button id="confirm-buy" class="button button-primary" type="button">
+          Compra
+        </button>
+      </div>
+    </dialog>
+    <dialog id="event-dialog" class="event-dialog" aria-labelledby="event-title" aria-describedby="event-copy">
+      <article id="event-card" class="event-card">
+        <div class="event-card-top">
+          <span id="event-label">
+            IMPREVISTO
+          </span>
+          <span>
+            TURIPOLY
+          </span>
+        </div>
+        <div id="event-art" class="event-card-art" aria-hidden="true">
+        </div>
+        <h2 id="event-title">
+          Novità in ufficio
+        </h2>
+        <p id="event-copy">
+        </p>
+        <p id="event-result" class="event-result">
+        </p>
+        <button id="event-continue" class="button button-primary full-width" type="button">
+          Continua
+        </button>
       </article>
     </dialog>
-</body>
+    <dialog id="detail-dialog" aria-labelledby="detail-title">
+      <div class="dialog-heading">
+        <h2 id="detail-title">
+          Dettaglio casella
+        </h2>
+        <button class="icon-button" type="button" data-close="detail-dialog" aria-label="Chiudi dettagli">
+          ×
+        </button>
+      </div>
+      <div id="detail-content">
+      </div>
+    </dialog>
+    <dialog id="properties-dialog" class="properties-dialog" aria-labelledby="properties-title">
+      <div class="dialog-heading">
+        <h2 id="properties-title">
+          Le tue postazioni
+        </h2>
+        <button class="icon-button" type="button" data-close="properties-dialog" aria-label="Chiudi postazioni">
+          ×
+        </button>
+      </div>
+      <p id="properties-summary">
+      </p>
+      <p class="small-note">
+        Completa un gruppo per raddoppiare gli affitti. Un upgrade costa metà del prezzo e porta l’affitto a 3× la base. Vendendo recuperi metà dell’investimento; gli upgrade delle altre postazioni restano attivi.
+      </p>
+      <div id="properties-list">
+      </div>
+      <p id="property-feedback" class="feedback" role="status">
+      </p>
+    </dialog>
+    <dialog id="sell-dialog" aria-labelledby="sell-title">
+      <h2 id="sell-title">
+        Vendi la postazione?
+      </h2>
+      <p id="sell-description">
+      </p>
+      <div class="dialog-actions">
+        <button class="button button-quiet" type="button" data-close="sell-dialog">
+          La tengo
+        </button>
+        <button id="confirm-sell" class="button button-danger" type="button">
+          Conferma vendita
+        </button>
+      </div>
+    </dialog>
+    <dialog id="rename-dialog" aria-labelledby="rename-title">
+      <form id="rename-form">
+        <div class="dialog-heading">
+          <h2 id="rename-title">
+            Come ti chiami?
+          </h2>
+          <button class="icon-button" type="button" data-close="rename-dialog" aria-label="Annulla modifica nome">
+            ×
+          </button>
+        </div>
+        <label class="field-label" for="rename-input">
+          Nome del collega
+        </label>
+        <input id="rename-input" maxlength="22" required autocomplete="off">
+        <p id="rename-error" class="form-error" role="alert">
+        </p>
+        <button class="button button-primary full-width" type="submit">
+          Salva nome
+        </button>
+      </form>
+    </dialog>
+    <dialog id="rules-dialog" class="rules-dialog" aria-labelledby="rules-title">
+      <div class="dialog-heading">
+        <h2 id="rules-title">
+          Sopravvivere all’ufficio
+        </h2>
+        <button class="icon-button" type="button" data-close="rules-dialog" aria-label="Chiudi regole">
+          ×
+        </button>
+      </div>
+      <ol class="rules-list">
+        <li>
+          <strong>
+            Si parte da €1.500.
+          </strong>
+          Tira due dadi e avanza in senso orario. Passando dall’ingresso ricevi €200. I doppi valgono come un tiro normale.
+        </li>
+        <li>
+          <strong>
+            Compra e fai pagare l’affitto.
+          </strong>
+          Puoi comprare solo la postazione libera su cui arrivi. Prezzo e affitto sono visibili prima della scelta.
+        </li>
+        <li>
+          <strong>
+            Il gruppo fa la forza.
+          </strong>
+          Possedere tutte le postazioni dello stesso colore raddoppia l’affitto. Puoi quindi comprare un upgrade per postazione: costa metà del prezzo, affitto a 3× la base.
+        </li>
+        <li>
+          <strong>
+            Gestisci prima di passare.
+          </strong>
+          Apri “Le tue postazioni” per potenziare o vendere alla banca al 50% dell’investimento. Un upgrade già acquistato resta attivo anche se vendi un’altra postazione del gruppo.
+        </li>
+        <li>
+          <strong>
+            Turi ti vuole vedere.
+          </strong>
+          La riunione blocca il prossimo tiro: scegli di saltarlo o paga €50 per delegare. Imprevisti e bonus si applicano premendo “Continua”.
+        </li>
+        <li>
+          <strong>
+            Il debito va pagato.
+          </strong>
+          Se la liquidità non basta, la banca vende automaticamente le tue postazioni a partire da quella con rimborso più basso, al 50% dell’investimento. Se non basta ancora, versi ciò che resta e sei in bancarotta.
+        </li>
+        <li>
+          <strong>
+            Si chiude a fine round.
+          </strong>
+          Dopo 12 o 20 round vince il patrimonio più alto: liquidità + valore d’acquisto di postazioni e upgrade. A pari patrimonio si vince insieme. In modalità Straordinari si continua fino a un solo superstite.
+        </li>
+      </ol>
+      <p class="small-note">
+        La partita si salva su questo browser dopo ogni azione. Per riprenderla usa lo stesso indirizzo e dispositivo. Nessun account, nessuna connessione tra dispositivi.
+      </p>
+      <button class="button button-primary full-width" type="button" data-close="rules-dialog">
+        Ho capito, si lavora
+      </button>
+    </dialog>
+    <dialog id="result-dialog" aria-labelledby="result-title">
+      <div class="dialog-heading">
+        <h2 id="result-title">
+          L’ufficio ha un vincitore
+        </h2>
+        <button class="icon-button" type="button" data-close="result-dialog" aria-label="Torna al tabellone">
+          ×
+        </button>
+      </div>
+      <p id="result-description">
+      </p>
+      <ol id="ranking-list" class="ranking-list">
+      </ol>
+      <button id="play-again" class="button button-primary full-width" type="button">
+        Un’altra giornata in ufficio
+      </button>
+    </dialog>
+    <p id="announcement" class="sr-only" role="status" aria-live="polite">
+    </p>
+  </body>
 </html>

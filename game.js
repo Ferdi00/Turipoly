@@ -1,105 +1,463 @@
-const spaces = [
-  {name:'Via del Cartellino',emoji:'🚪',type:'start',description:'Si timbra e si ricomincia. Incassa €200 quando passi di qui.'},
-  {name:'Scrivania vicino alla finestra',emoji:'🪟',type:'property',price:120,rent:24,color:'#91ae78'},
-  {name:'La macchinetta del caffè',emoji:'☕',type:'event',event:'coffee'},
-  {name:'Postazione con doppio monitor',emoji:'🖥️',type:'property',price:160,rent:32,color:'#91ae78'},
-  {name:'Stampante in sciopero',emoji:'🖨️',type:'event',event:'printer'},
-  {name:'Riunione che poteva essere un’email',emoji:'📅',type:'event',event:'meeting'},
-  {name:'Sala riunioni panoramica',emoji:'🪴',type:'property',price:200,rent:40,color:'#81a57c'},
-  {name:'Smart working dal divano',emoji:'🛋️',type:'event',event:'remote'},
-  {name:'Angolo snack',emoji:'🍪',type:'property',price:220,rent:44,color:'#81a57c'},
-  {name:'Parcheggi nel posto riservato del direttore',emoji:'🚗',type:'event',event:'parking'},
-  {name:'Riunione urgente con Turi',emoji:'👔',type:'jail',description:'Turi ti vuole vedere. Salta un turno e prepara una slide.'},
-  {name:'Progetto “per ieri”',emoji:'⏰',type:'property',price:260,rent:52,color:'#d7a85a'},
-  {name:'Il capo scrive “hai un minuto?”',emoji:'💬',type:'event',event:'boss'},
-  {name:'Ufficio con aria condizionata',emoji:'❄️',type:'property',price:280,rent:56,color:'#d7a85a'},
-  {name:'Distributore di snack',emoji:'🥨',type:'property',price:300,rent:60,color:'#d7a85a'},
-  {name:'Venerdì, ore 16:59',emoji:'🕔',type:'event',event:'friday'},
-  {name:'La sala riunioni è libera',emoji:'🔑',type:'property',price:320,rent:64,color:'#ce8769'},
-  {name:'Pranzo di team',emoji:'🍝',type:'event',event:'lunch'},
-  {name:'Il tuo progetto preferito',emoji:'💡',type:'property',price:340,rent:68,color:'#ce8769'},
-  {name:'Bonus: obiettivo centrato',emoji:'🎯',type:'event',event:'bonus'},
-  {name:'Ferie approvate',emoji:'🏖️',type:'rest',description:'Una giornata senza notifiche. Incassa €100 di serenità.'},
-  {name:'Postazione del capo',emoji:'🪑',type:'property',price:380,rent:76,color:'#a987ad'},
-  {name:'La macchinetta si mangia la moneta',emoji:'🪙',type:'event',event:'coin'},
-  {name:'Ufficio tutto per te',emoji:'🏢',type:'property',price:420,rent:84,color:'#a987ad'},
-  {name:'Fine mese: report spese',emoji:'🧾',type:'event',event:'expenses'},
-  {name:'La stampante finalmente funziona',emoji:'✅',type:'event',event:'printerWin'},
-  {name:'Terrazza aziendale',emoji:'🌿',type:'property',price:460,rent:92,color:'#568a8b'},
-  {name:'Turi offre il caffè',emoji:'☕',type:'event',event:'turiCoffee'},
-  {name:'Ufficio vista mare (quasi)',emoji:'🌊',type:'property',price:500,rent:100,color:'#568a8b'},
-  {name:'Promozione: da lunedì!',emoji:'📈',type:'event',event:'promotion'},
-  {name:'Festa aziendale',emoji:'🎉',type:'rest',description:'Hai fatto networking vicino al buffet. Incassa €150.'},
-  {name:'Sala del consiglio',emoji:'🏛️',type:'property',price:560,rent:112,color:'#5472a0'},
-  {name:'Imprevisto',emoji:'🎲',type:'event',event:'chance'},
-  {name:'L’ufficio di Turi',emoji:'👔',type:'property',price:620,rent:124,color:'#5472a0'},
-  {name:'Team building obbligatorio',emoji:'🧗',type:'event',event:'team'},
-  {name:'Giardino segreto dell’ufficio',emoji:'🌳',type:'property',price:680,rent:136,color:'#5472a0'},
-  {name:'Messaggio: “ci sentiamo lunedì”',emoji:'📨',type:'event',event:'monday'},
-  {name:'Parcheggio VIP',emoji:'🅿️',type:'property',price:740,rent:148,color:'#6f849b'},
-  {name:'Revisione budget',emoji:'📉',type:'event',event:'budget'},
-  {name:'Parcheggio coperto',emoji:'🚘',type:'property',price:780,rent:156,color:'#6f849b'}
-];
-const colors=['#3274a1','#d76246','#8c64a7','#d1a339'];
-const tokens=['🧑‍💻','🧑‍🔧','🧑‍🎨','🧑‍🚀'];
-let players=[];let current=0;let owners={};let skipTurns={};let busy=false;let pendingSpace=null;
-const $=id=>document.getElementById(id);
-function init(){players=[{name:'Collega 1',cash:1500,pos:0},{name:'Collega 2',cash:1500,pos:0}];current=0;owners={};skipTurns={};busy=false;pendingSpace=null;render();$('center-hint').textContent='Che la settimana lavorativa abbia inizio.';}
-function coords(i){if(i<10)return[10,10-i,'bottom'];if(i<20)return[20-i,0,'left'];if(i<30)return[0,i-20,'top'];return[i-30,10,'right'];}
-const tileLabels={
-  'Via del Cartellino':'Ingresso',
-  'Scrivania vicino alla finestra':'Scrivania finestra',
-  'La macchinetta del caffè':'Macchinetta caffè',
-  'Postazione con doppio monitor':'Doppio monitor',
-  'Stampante in sciopero':'Stampante KO',
-  'Riunione che poteva essere un’email':'Riunione-email',
-  'Sala riunioni panoramica':'Sala panoramica',
-  'Smart working dal divano':'Smart working',
-  'Angolo snack':'Angolo snack',
-  'Parcheggi nel posto riservato del direttore':'Parcheggio capo',
-  'Riunione urgente con Turi':'Da Turi!',
-  'Progetto “per ieri”':'Progetto urgente',
-  'Il capo scrive “hai un minuto?”':'“Hai un minuto?”',
-  'Ufficio con aria condizionata':'Aria condizionata',
-  'Distributore di snack':'Distributore snack',
-  'Venerdì, ore 16:59':'Venerdì 16:59',
-  'La sala riunioni è libera':'Sala riunioni libera',
-  'Pranzo di team':'Pranzo di team',
-  'Il tuo progetto preferito':'Progetto preferito',
-  'Bonus: obiettivo centrato':'Obiettivo centrato',
-  'Ferie approvate':'Ferie!',
-  'Postazione del capo':'Postazione Turi',
-  'La macchinetta si mangia la moneta':'Moneta inghiottita',
-  'Ufficio tutto per te':'Ufficio tutto tuo',
-  'Fine mese: report spese':'Report spese',
-  'La stampante finalmente funziona':'Stampante OK',
-  'Turi offre il caffè':'Caffè di Turi',
-  'Terrazza aziendale':'Terrazza aziendale',
-  'Ufficio vista mare (quasi)':'Vista mare',
-  'Promozione: da lunedì!':'Promozione',
-  'Festa aziendale':'Festa aziendale',
-  'Sala del consiglio':'Sala del consiglio',
-  'Imprevisto':'Imprevisto!',
-  'L’ufficio di Turi':'Ufficio di Turi',
-  'Team building obbligatorio':'Team building',
-  'Giardino segreto dell’ufficio':'Giardino segreto',
-  'Messaggio: “ci sentiamo lunedì”':'Ci sentiamo lunedì',
-  'Parcheggio VIP':'Parcheggio VIP',
-  'Revisione budget':'Revisione budget'
-};
-function renderBoard(){const board=$('board');board.querySelectorAll('.space').forEach(n=>n.remove());spaces.forEach((s,i)=>{const [r,c,side]=coords(i);const el=document.createElement('div');el.className=`space ${side} ${[0,10,20,30].includes(i)?'corner':''}`;el.style.gridRow=r+1;el.style.gridColumn=c+1;el.title=`${s.name}${s.price?` · €${s.price}`:''}`;if(owners[i]!==undefined){el.classList.add('owned');el.style.setProperty('--owner-color',colors[owners[i]])}const stripe=document.createElement('span');stripe.className='space-color';stripe.style.background=s.color||({event:'#e6b64c',jail:'#cb5a47',start:'#326b50',rest:'#91ae78'}[s.type]||'#91ae78');const emoji=document.createElement('span');emoji.className='space-emoji';emoji.textContent=s.emoji;const name=document.createElement('span');name.className='space-name';name.textContent=tileLabels[s.name]||s.name;el.append(stripe,emoji,name);if(s.price){const price=document.createElement('span');price.className='space-price';price.textContent=`€${s.price}`;el.append(price)}const row=document.createElement('span');row.className='space-token-row';players.forEach((p,n)=>{if(p.pos===i){const token=document.createElement('span');token.className=`token p${n}`;token.style.background=colors[n];token.textContent=tokens[n];token.setAttribute('aria-label',p.name);row.append(token)}});el.append(row);board.append(el)});}
-function renderPlayers(){const list=$('players-list');list.replaceChildren();players.forEach((p,i)=>{const card=document.createElement('div');card.className=`player-card ${i===current?'active':''}`;const avatar=document.createElement('span');avatar.className='avatar';avatar.textContent=tokens[i];avatar.style.background=`${colors[i]}18`;const main=document.createElement('div');main.className='player-main';const name=document.createElement('div');name.className='player-name';name.textContent=p.name;name.title='Clicca per cambiare nome';name.tabIndex=0;name.role='button';name.addEventListener('click',()=>rename(i));name.addEventListener('keydown',e=>{if(e.key==='Enter')rename(i)});const meta=document.createElement('div');meta.className='player-meta';meta.textContent=skipTurns[i]?'In riunione con Turi':`Casella ${p.pos+1} · ${i===current?'Tocca a te':'In attesa'}`;main.append(name,meta);const cash=document.createElement('div');cash.className='player-cash';cash.textContent=`€${p.cash}`;const cashLabel=document.createElement('small');cashLabel.textContent='liquidità';cash.append(cashLabel);card.append(avatar,main,cash);list.append(card)});$('center-player').textContent=players[current]?.name||'—';$('add-player').disabled=players.length>=4;}
-function render(){renderBoard();renderPlayers()}
-function rename(i){if(busy)return;const n=prompt('Come si chiama questo collega?',players[i].name);if(n&&n.trim()){players[i].name=n.trim().slice(0,22);render();log(`${tokens[i]} ${players[i].name} è pronto a giocare.`)}}
-function addPlayer(){if(players.length>=4||busy)return;players.push({name:`Collega ${players.length+1}`,cash:1500,pos:0});render();log(`${tokens[players.length-1]} Un nuovo collega entra in ufficio.`)}
-function log(message){const li=document.createElement('li');const dot=document.createElement('span');dot.className='log-dot';const text=document.createElement('span');text.textContent=message;const time=document.createElement('time');time.textContent='ora';li.append(dot,text,time);$('activity-log').prepend(li);while($('activity-log').children.length>8)$('activity-log').lastElementChild.remove()}
-function status(icon,title,body){$('status-card').innerHTML='';const e=document.createElement('span');e.className='status-emoji';e.textContent=icon;const box=document.createElement('div');const strong=document.createElement('strong');strong.textContent=title;const p=document.createElement('p');p.textContent=body;box.append(strong,p);$('status-card').append(e,box)}
-const money=(i,n,why)=>{players[i].cash+=n;const val=`€${Math.abs(n)}`;if(n>=0)status('💸',`+${val}`,why);else status('🧾',`-${val}`,why)};
-function roll(){if(busy)return;busy=true;const p=players[current];if(skipTurns[current]){skipTurns[current]--;log(`${p.name} resta in riunione con Turi: turno saltato.`);status('👔','Ancora in riunione','Turi ha una domanda veloce (che non è veloce).');nextTurn();return}const a=1+Math.floor(Math.random()*6),b=1+Math.floor(Math.random()*6),sum=a+b;$('dice-display').innerHTML=`<span>${['⚀','⚁','⚂','⚃','⚄','⚅'][a-1]}</span><span>${['⚀','⚁','⚂','⚃','⚄','⚅'][b-1]}</span>`;$('center-hint').textContent=`${a} + ${b} = ${sum} caselle. Si va!`;setTimeout(()=>movePlayer(sum),350)}
-function movePlayer(amount){const p=players[current];const old=p.pos;p.pos=(old+amount)%spaces.length;if(old+amount>=spaces.length){money(current,200,'Hai completato un altro giro di ufficio. Incassi lo stipendio.');log(`${p.name} passa dal cartellino e incassa €200.`)}render();const s=spaces[p.pos];log(`${p.name} arriva su “${s.name}”.`);resolve(s)}
-function resolve(s){const p=players[current];if(s.type==='property'){if(owners[p.pos]===undefined){if(p.cash>=s.price){pendingSpace=p.pos;$('dialog-icon').textContent=s.emoji;$('dialog-title').textContent='Nuova postazione!';$('dialog-description').textContent=`${s.name} costa €${s.price}. Se la compri, chi ci capiterà sopra ti dovrà €${s.rent}.`; $('confirm-buy').textContent=`Compra · €${s.price}`;$('choice-dialog').showModal();return}status('💸','Budget insufficiente',`Ti servono €${s.price} per comprare ${s.name}.`)}else if(owners[p.pos]!==current){const owner=owners[p.pos],rent=s.rent;players[current].cash-=rent;players[owner].cash+=rent;status('🏢',`Affitto: €${rent}`,`${p.name} paga ${players[owner].name} per usare ${s.name}.`);log(`${p.name} paga €${rent} a ${players[owner].name} per la postazione.`)}else status('🪑','La tua postazione',`Ti godi ${s.name} senza pagare affitto.`)}else if(s.type==='start'){status('🚪','Inizio del giro','Hai timbrato. Buona giornata lavorativa!')}else if(s.type==='jail'){skipTurns[current]=1;status('👔','Convocazione urgente',s.description);log(`${p.name} viene convocato da Turi. Salta il prossimo turno.`)}else if(s.type==='rest'){money(current,s.name==='Ferie approvate'?100:150,s.description)}else if(doEvent(s.event)===false)return;render();if(!busy)return;setTimeout(nextTurn,1000)}
-function doEvent(id){const p=players[current];const events={coffee:()=>{money(current,-2,'La macchinetta si è mangiata la moneta. Almeno il caffè era buono?');log(`${p.name} perde €2 alla macchinetta.`)},printer:()=>{money(current,-50,'La stampante ha inghiottito il report. Toner e pazienza a carico tuo.');log(`${p.name} paga €50 per la stampante.`)},meeting:()=>{money(current,-20,'Riunione di un’ora. Hai perso tempo e ordinato un altro caffè.');log(`${p.name} resta bloccato in riunione.`)},remote:()=>{p.pos=(p.pos+3)%spaces.length;status('🛋️','Smart working!',`${p.name} avanza di 3 caselle dal divano.`);log(`${p.name} avanza di 3 caselle in smart working.`);render();setTimeout(()=>resolve(spaces[p.pos]),650);return false},boss:()=>{money(current,-30,'“Hai un minuto?” diventa una revisione urgente.');log(`${p.name} spende €30 dopo il messaggio di Turi.`)},friday:()=>{money(current,80,'Hai chiuso il laptop alle 17:00 precise. Premio meritato!');log(`${p.name} scappa prima della riunione del venerdì.`)},lunch:()=>{money(current,-25,'Pranzo di team: questa volta hai offerto tu.');log(`${p.name} offre il pranzo al team.`)},bonus:()=>{money(current,150,'Obiettivo centrato. Turi ha detto “bravi tutti”.');log(`${p.name} riceve un bonus di €150.`)},coin:()=>{money(current,-2,'Moneta inghiottita. La macchinetta sa chi sei.');log(`${p.name} perde €2 alla macchinetta.`)},expenses:()=>{money(current,-40,'Il taxi della trasferta non era rimborsabile.');log(`${p.name} paga €40 di spese non rimborsate.`)},printerWin:()=>{money(current,40,'La stampante ha funzionato al primo tentativo: evento rarissimo!');log(`${p.name} riceve €40 per il miracolo della stampante.`)},turiCoffee:()=>{money(current,20,'Turi offre il caffè. Segnalo sul calendario.');log(`${p.name} riceve un caffè offerto da Turi.`)},promotion:()=>{money(current,200,'La promozione parte da lunedì. Naturalmente.');log(`${p.name} riceve €200 di aumento promesso.`)},team:()=>{money(current,-35,'Team building: il karaoke aziendale ha un costo.');log(`${p.name} paga €35 per il team building.`)},monday:()=>{money(current,60,'“Ci sentiamo lunedì” — e lunedì è andata meglio del previsto.');log(`${p.name} incassa €60 dopo il weekend.`)},budget:()=>{money(current,-75,'Revisione budget: tagli su tutto, soprattutto sul tuo bonus.');log(`${p.name} perde €75 nella revisione budget.`)},chance:()=>{const list=[['good',100,'Hai trovato una gift card dimenticata nel cassetto.'],['bad',-60,'Hai rotto le cuffie durante la call.'],['good',50,'Un collega ti deve ancora il pranzo.'],['bad',-40,'La call poteva essere un’email, ma il taxi no.']];const [kind,amount,desc]=list[Math.floor(Math.random()*list.length)];money(current,amount,desc);log(`${p.name}: imprevisto ${amount>0?'fortunato':'sfortunato'}.`)}};const result=events[id]?.();if(result===false)return;}
-function nextTurn(){current=(current+1)%players.length;render();busy=false;$('center-hint').textContent=`Tocca a ${players[current].name}. Tira i dadi!`}
-function buy(){if(pendingSpace===null)return;const s=spaces[pendingSpace];players[current].cash-=s.price;owners[pendingSpace]=current;log(`${players[current].name} compra “${s.name}” per €${s.price}.`);status('🔑','Postazione acquistata',`${players[current].name} ora possiede ${s.name}.`);$('choice-dialog').close();pendingSpace=null;render();setTimeout(nextTurn,700)}
-function decline(){if(pendingSpace!==null)log(`${players[current].name} rinuncia a “${spaces[pendingSpace].name}”.`);pendingSpace=null;$('choice-dialog').close();setTimeout(nextTurn,400)}
-$('roll-dice').addEventListener('click',roll);$('add-player').addEventListener('click',addPlayer);$('new-game').addEventListener('click',()=>{if(confirm('Iniziare una nuova partita? Tutti i progressi attuali saranno azzerati.'))init()});$('confirm-buy').addEventListener('click',buy);$('decline-buy').addEventListener('click',decline);$('choice-dialog').addEventListener('cancel',e=>{e.preventDefault();decline()});init();
+(() => {
+  'use strict';
+  const G = window.Turipoly;
+  const $ = id => document.getElementById(id);
+  const STORAGE_KEY = 'turipoly.save.v2';
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let state = null;
+  let busy = false;
+  let rollTimer = null;
+  let setupNames = ['Collega 1', 'Collega 2'];
+  let renamePlayer = null;
+  let sellIndex = null;
+  let resultShown = false;
+  let boardCursor = 0;
+  let lastLog = '';
+  const tiles = [];
+  const playerTokens = [];
+
+  function element(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function show(id) { if (!$(id).open) $(id).showModal(); }
+  function close(id) { if ($(id).open) $(id).close(); }
+  function speak(message) { $('announcement').textContent = message; }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      $('save-status').textContent = 'Partita salvata su questo browser';
+      $('save-status').className = '';
+    } catch {
+      $('save-status').textContent = 'Salvataggio non disponibile: non chiudere la pagina.';
+      $('save-status').className = 'save-error';
+    }
+  }
+
+  function apply(action, { focus = true } = {}) {
+    if (!state || busy || action() === false) return;
+    save();
+    render();
+    syncDialogs();
+    if (focus && !document.querySelector('dialog[open]')) focusAction();
+  }
+
+  function focusAction() {
+    const target = state.phase === 'gameover' ? $('roll-dice') : state.players[state.current].skip && state.phase === 'ready' ? $('skip-meeting') : state.phase === 'end' ? $('end-turn') : $('roll-dice');
+    target.focus({ preventScroll: true });
+  }
+
+  function coords(i) {
+    if (i < 10) return [10, 10 - i];
+    if (i < 20) return [20 - i, 0];
+    if (i < 30) return [0, i - 20];
+    return [i - 30, 10];
+  }
+
+  function buildBoard() {
+    const fragment = document.createDocumentFragment();
+    G.spaces.forEach((space, index) => {
+      const [row, col] = coords(index);
+      const tile = element('button', `space${index % 10 === 0 ? ' corner' : ''}`);
+      tile.type = 'button';
+      tile.dataset.space = index;
+      tile.tabIndex = index === 0 ? 0 : -1;
+      tile.style.gridRow = row + 1;
+      tile.style.gridColumn = col + 1;
+      const stripe = element('span', 'space-color');
+      stripe.style.background = space.color || ({ event: '#e2b43e', jail: '#c85443', start: '#478853', rest: '#88ac5f' }[space.type]);
+      const icon = element('span', 'space-emoji', space.emoji);
+      icon.setAttribute('aria-hidden', 'true');
+      const owner = element('span', 'space-owner');
+      owner.hidden = true;
+      const tokens = element('span', 'space-token-row');
+      tile.append(stripe, icon, element('span', 'space-name', space.label), element('span', 'space-price', space.price ? G.euro(space.price) : ''), owner, tokens);
+      tile.addEventListener('click', () => { setBoardCursor(index); openDetail(index); });
+      tile.addEventListener('keydown', event => {
+        let next = index;
+        if (['ArrowRight', 'ArrowDown'].includes(event.key)) next = (index + 1) % 40;
+        else if (['ArrowLeft', 'ArrowUp'].includes(event.key)) next = (index + 39) % 40;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = 39;
+        else return;
+        event.preventDefault();
+        setBoardCursor(next);
+        tiles[next].node.focus();
+      });
+      tiles.push({ node: tile, owner, tokens });
+      fragment.append(tile);
+    });
+    $('board').append(fragment);
+    for (let i = 0; i < 4; i++) {
+      const token = element('span', 'token', String(i + 1));
+      token.style.setProperty('--player-color', G.colors[i]);
+      playerTokens.push(token);
+    }
+  }
+
+  function setBoardCursor(index) {
+    tiles[boardCursor].node.tabIndex = -1;
+    tiles[index].node.tabIndex = 0;
+    boardCursor = index;
+  }
+
+  function renderBoard() {
+    tiles.forEach((tile, i) => {
+      const s = G.spaces[i];
+      const owner = state?.owners[i];
+      const occupants = state ? state.players.filter(p => !p.bankrupt && p.pos === i).map(p => p.name) : [];
+      tile.node.classList.toggle('current-space', !!state && state.phase !== 'gameover' && state.players[state.current].pos === i);
+      tile.node.style.setProperty('--active-color', G.colors[state?.current || 0]);
+      tile.owner.hidden = owner === null || owner === undefined;
+      if (owner !== null && owner !== undefined) {
+        tile.node.style.setProperty('--owner-color', G.colors[owner]);
+        tile.owner.textContent = `${owner + 1}${state.upgrades[i] ? ' ★' : ''}`;
+      }
+      const description = `${i + 1}. ${s.name}${s.price ? `. Prezzo ${G.euro(s.price)}. ${owner === null || owner === undefined ? 'Libera' : `Di ${state.players[owner].name}. Affitto ${G.euro(G.rent(state, i))}`}` : ''}${occupants.length ? `. Qui: ${occupants.join(', ')}` : ''}.`;
+      tile.node.setAttribute('aria-label', description);
+      tile.node.title = description;
+    });
+    playerTokens.forEach((token, i) => {
+      const p = state?.players[i];
+      if (!p || p.bankrupt) { token.remove(); return; }
+      token.setAttribute('aria-label', p.name);
+      const parent = tiles[p.pos].tokens;
+      if (token.parentElement !== parent) parent.append(token);
+    });
+  }
+
+  function renderPlayers() {
+    const fragment = document.createDocumentFragment();
+    state.players.forEach((p, i) => {
+      const card = element('div', `player-card${i === state.current && state.phase !== 'gameover' ? ' active' : ''}${p.bankrupt ? ' bankrupt' : ''}`);
+      const avatar = element('span', 'avatar', String(i + 1));
+      avatar.style.setProperty('--player-color', G.colors[i]);
+      avatar.setAttribute('aria-hidden', 'true');
+      const main = element('div', 'player-main');
+      const name = element('button', 'player-name', p.name);
+      name.type = 'button';
+      name.title = `Modifica il nome di ${p.name}`;
+      name.setAttribute('aria-label', `Modifica nome: ${p.name}`);
+      name.disabled = busy;
+      name.addEventListener('click', () => openRename(i));
+      const meta = p.bankrupt ? 'Bancarotta' : `${G.owned(state, i).length} postazioni${p.skip ? ' · In riunione' : i === state.current && state.phase !== 'gameover' ? ' · Tocca a te' : ''}`;
+      main.append(name, element('div', 'player-meta', meta));
+      const cash = element('div', 'player-cash', G.euro(p.cash));
+      cash.append(element('small', '', `Patrimonio ${G.euro(G.worth(state, i))}`));
+      card.append(avatar, main, cash);
+      fragment.append(card);
+    });
+    $('players-list').replaceChildren(fragment);
+    $('player-count').textContent = `${state.players.filter(p => !p.bankrupt).length} in gioco`;
+  }
+
+  function render() {
+    renderBoard();
+    if (!state) return;
+    const p = state.players[state.current];
+    const ended = state.phase === 'gameover';
+    renderPlayers();
+    $('round-label').textContent = ended ? 'Giornata conclusa' : `Round ${state.round}${state.maxRounds ? ` di ${state.maxRounds}` : ' · Straordinari'} · ${state.players.length} colleghi`;
+    $('center-caption').textContent = ended ? 'Ufficio conquistato' : 'È il turno di';
+    $('center-player').textContent = ended ? state.result.winners.map(i => state.players[i].name).join(' e ') : p.name;
+    $('center-position').textContent = ended ? 'Una riunione alla volta.' : `${G.spaces[p.pos].name} · casella ${p.pos + 1}`;
+    $('turn-title').textContent = ended ? 'Si chiude l’ufficio.' : `Tocca a ${p.name}`;
+    $('turn-marker').style.background = G.colors[state.current];
+    $('roll-dice').hidden = !ended && (state.phase !== 'ready' || !!p.skip);
+    $('roll-dice').disabled = busy;
+    $('roll-dice').textContent = ended ? 'Rivedi la classifica' : busy ? 'Dadi in volo…' : 'Tira i dadi';
+    $('end-turn').hidden = state.phase !== 'end';
+    $('end-turn').disabled = busy;
+    const next = nextPlayerName();
+    $('end-turn').textContent = p.bankrupt ? `Continua con ${next}` : 'Termina il turno';
+    $('end-turn').setAttribute('aria-label', `Termina il turno di ${p.name}. Prossimo collega: ${next}`);
+    $('meeting-actions').hidden = !(p.skip && state.phase === 'ready');
+    $('pay-meeting').disabled = p.cash < 50 || busy;
+    $('skip-meeting').disabled = busy;
+    $('manage-properties').disabled = !G.canManage(state) || busy;
+    $('manage-properties').textContent = `Le tue postazioni · ${G.owned(state, state.current).length}`;
+    $('new-game').disabled = busy;
+    const hints = { ready: p.skip ? 'Turi ti aspetta. Resti o deleghi?' : 'Due dadi. Una nuova occasione.', purchase: 'Una postazione libera: scegli se acquistarla.', event: 'C’è una novità in ufficio. Leggi la carta.', end: `Quando sei pronto, passa a ${next}.`, gameover: 'La squadra può rivedere il tabellone o iniziare una nuova partita.' };
+    $('turn-hint').textContent = busy ? 'I dadi stanno decidendo la tua giornata…' : hints[state.phase];
+    $('dice-display').querySelectorAll('.die').forEach((die, i) => { die.textContent = state.dice[i] || '–'; });
+    $('dice-display').setAttribute('aria-label', state.dice[0] ? `Dadi: ${state.dice[0]} e ${state.dice[1]}. Totale ${state.dice[0] + state.dice[1]}.` : 'Dadi da tirare');
+    $('status-card').dataset.tone = state.notice.tone;
+    $('status-card').replaceChildren(element('strong', '', state.notice.title), element('p', '', state.notice.text));
+    const logKey = JSON.stringify(state.log);
+    if (lastLog !== logKey) {
+      $('activity-log').replaceChildren(...state.log.slice(0, 16).map(message => element('li', '', message)));
+      $('activity-log').scrollTop = 0;
+      lastLog = logKey;
+    }
+    $('log-count').textContent = state.log.length;
+  }
+
+  function nextPlayerName() {
+    let next = state.current;
+    do { next = (next + 1) % state.players.length; } while (state.players[next].bankrupt);
+    return state.players[next].name;
+  }
+
+  function stats(container, rows) {
+    container.replaceChildren(...rows.flatMap(([label, value]) => [element('dt', '', label), element('dd', '', value)]));
+  }
+
+  function syncDialogs() {
+    if (!state || busy) return;
+    if (state.phase !== 'purchase') close('choice-dialog');
+    if (state.phase !== 'event') close('event-dialog');
+    if (state.phase === 'purchase') {
+      const i = state.pending;
+      const s = G.spaces[i];
+      $('choice-group').textContent = `Gruppo ${s.group}`;
+      $('choice-title').textContent = s.name;
+      $('choice-description').textContent = `Una nuova postazione per ${state.players[state.current].name}. Completa le ${G.groupIds(i).length} postazioni di questo gruppo per raddoppiare l’affitto.`;
+      stats($('choice-stats'), [['Prezzo', G.euro(s.price)], ['Affitto base', G.euro(s.rent)], ['Gruppo completo', G.euro(s.rent * 2)]]);
+      $('choice-balance').textContent = `Ti restano ${G.euro(state.players[state.current].cash - s.price)} dopo l’acquisto.`;
+      $('confirm-buy').textContent = `Compra · ${G.euro(s.price)}`;
+      show('choice-dialog');
+      $('decline-buy').focus();
+    } else if (state.phase === 'event') {
+      const card = G.pendingCard(state);
+      $('event-card').className = `event-card tone-${card.tone}`;
+      $('event-label').textContent = card.tone === 'good' ? 'BUONE NUOVE' : 'IMPREVISTO';
+      $('event-title').textContent = card.title;
+      $('event-art').textContent = card.icon;
+      $('event-copy').textContent = card.text;
+      $('event-result').textContent = card.move ? `Avanza di ${card.move} caselle` : `${card.delta > 0 ? 'Incassi' : 'Paghi'} ${G.euro(Math.abs(card.delta || 0))}`;
+      show('event-dialog');
+      $('event-continue').focus();
+    } else if (state.phase === 'gameover' && !resultShown) {
+      resultShown = true;
+      openResult();
+    }
+  }
+
+  function dice() {
+    if (!window.crypto?.getRandomValues) return 1 + Math.floor(Math.random() * 6);
+    const buffer = new Uint32Array(1);
+    do { crypto.getRandomValues(buffer); } while (buffer[0] >= 4294967292);
+    return buffer[0] % 6 + 1;
+  }
+
+  function roll() {
+    if (!state || busy) return;
+    if (state.phase === 'gameover') { openResult(); return; }
+    if (state.phase !== 'ready' || state.players[state.current].skip) return;
+    const values = [dice(), dice()];
+    // Commit first: a refresh during animation resumes the same result, never a new roll.
+    if (!G.roll(state, values)) return;
+    save();
+    busy = true;
+    $('dice-display').classList.add('rolling');
+    render();
+    $('roll-dice').hidden = false;
+    $('end-turn').hidden = true;
+    rollTimer = setTimeout(() => {
+      rollTimer = null;
+      busy = false;
+      $('dice-display').classList.remove('rolling');
+      render();
+      syncDialogs();
+      speak(`${values[0]} e ${values[1]}. ${state.players[state.current].name} arriva su ${G.spaces[state.players[state.current].pos].name}.`);
+      if (!document.querySelector('dialog[open]')) focusAction();
+    }, reducedMotion.matches ? 0 : 480);
+  }
+
+  function readSetupFields() { setupNames = [...$('player-fields').querySelectorAll('input')].map(input => input.value); }
+
+  function renderSetupFields() {
+    $('player-fields').replaceChildren(...setupNames.map((name, i) => {
+      const row = element('div', 'player-field');
+      const label = element('label', '', String(i + 1));
+      label.htmlFor = `player-${i}`;
+      label.style.setProperty('--player-color', G.colors[i]);
+      const input = element('input');
+      input.id = `player-${i}`;
+      input.value = name;
+      input.required = true;
+      input.maxLength = 22;
+      input.autocomplete = 'off';
+      input.setAttribute('aria-label', `Nome del collega ${i + 1}`);
+      row.append(label, input);
+      return row;
+    }));
+    $('setup-count').textContent = `${setupNames.length} colleghi`;
+    $('add-player').disabled = setupNames.length >= 4;
+    $('remove-player').disabled = setupNames.length <= 2;
+  }
+
+  function openSetup() {
+    if (busy) return;
+    setupNames = state ? state.players.map(p => p.name) : ['Collega 1', 'Collega 2'];
+    $('game-length').value = state?.maxRounds ?? 12;
+    $('close-setup').hidden = !state;
+    $('replace-warning').hidden = !state;
+    $('setup-error').textContent = '';
+    renderSetupFields();
+    show('setup-dialog');
+  }
+
+  function startGame(event) {
+    event.preventDefault();
+    readSetupFields();
+    let next;
+    try { next = G.create(setupNames, Number($('game-length').value)); }
+    catch (error) { $('setup-error').textContent = error.message; return; }
+    clearTimeout(rollTimer);
+    busy = false;
+    resultShown = false;
+    document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+    $('dice-display').classList.remove('rolling');
+    state = next;
+    save();
+    render();
+    focusAction();
+  }
+
+  function openDetail(index) {
+    const s = G.spaces[index];
+    $('detail-title').textContent = s.name;
+    const content = $('detail-content');
+    content.replaceChildren();
+    if (s.type === 'property') {
+      const owner = state?.owners[index];
+      const ownerName = owner === null || owner === undefined ? 'Libera' : state.players[owner].name;
+      content.append(element('span', 'property-group', `${s.group} · ${G.groupIds(index).length} postazioni`));
+      const dl = element('dl', 'property-stats');
+      stats(dl, [['Prezzo', G.euro(s.price)], ['Proprietario', ownerName], ['Affitto attuale', G.euro(state ? G.rent(state, index) : s.rent)], ['Gruppo completo', G.euro(s.rent * 2)], ['Con upgrade', G.euro(s.rent * 3)], ['Costo upgrade', G.euro(G.upgradeCost(index))]]);
+      content.append(dl, element('p', '', `Nel gruppo: ${G.groupIds(index).map(i => G.spaces[i].label).join(', ')}.`));
+    } else {
+      const card = s.event ? window.TuripolyCards.eventDeck[s.event] : null;
+      content.append(element('p', '', s.description || (card?.random ? 'Pesca dal mazzo degli imprevisti. Le carte si rimescolano solo dopo averle pescate tutte.' : card?.text) || 'Un’altra giornata in ufficio.'));
+      if (s.type === 'jail') content.append(element('p', '', 'Il prossimo turno puoi delegare la riunione per €50 oppure saltare il tiro.'));
+    }
+    show('detail-dialog');
+  }
+
+  function renderProperties() {
+    const p = state.players[state.current];
+    const ids = G.owned(state, state.current);
+    $('properties-title').textContent = `Le postazioni di ${p.name}`;
+    $('properties-summary').textContent = `Liquidità ${G.euro(p.cash)} · Patrimonio ${G.euro(G.worth(state, state.current))}`;
+    $('properties-list').replaceChildren();
+    if (!ids.length) $('properties-list').append(element('p', 'empty-note', 'Nessuna postazione, per ora. Arriva su una casella libera e comprala per iniziare.'));
+    ids.forEach(index => {
+      const s = G.spaces[index];
+      const row = element('section', 'property-row');
+      row.append(element('span', 'property-group', `${s.group}${G.fullGroup(state, index) ? ' · completo' : ''}`), element('h3', '', `${s.name}${state.upgrades[index] ? ' ★' : ''}`), element('p', '', `Affitto ${G.euro(G.rent(state, index))} · Valore ${G.euro(s.price + (state.upgrades[index] ? G.upgradeCost(index) : 0))}`));
+      const actions = element('div', 'action-pair');
+      const upgrade = element('button', 'button button-outline', state.upgrades[index] ? 'Già potenziata' : `Upgrade · ${G.euro(G.upgradeCost(index))}`);
+      upgrade.type = 'button';
+      upgrade.disabled = !!state.upgrades[index] || !G.fullGroup(state, index) || p.cash < G.upgradeCost(index) || !G.canManage(state);
+      upgrade.addEventListener('click', () => {
+        apply(() => G.upgrade(state, index), { focus: false });
+        renderProperties();
+        $('property-feedback').textContent = `Upgrade di ${s.name} completato. Affitto ${G.euro(G.rent(state, index))}.`;
+        $('properties-dialog').querySelector('.icon-button').focus({ preventScroll: true });
+      });
+      const sell = element('button', 'button button-quiet', `Vendi · ${G.euro(G.resale(state, index))}`);
+      sell.type = 'button';
+      sell.disabled = !G.canManage(state);
+      sell.addEventListener('click', () => {
+        sellIndex = index;
+        $('sell-description').textContent = `La banca ti versa ${G.euro(G.resale(state, index))} per ${s.name}. La postazione torna libera e il gruppo perde il bonus di completezza. Gli altri upgrade restano attivi.`;
+        show('sell-dialog');
+      });
+      actions.append(upgrade, sell);
+      row.append(actions);
+      if (!state.upgrades[index]) row.append(element('p', 'small-note', !G.fullGroup(state, index) ? 'Completa il gruppo per sbloccare l’upgrade.' : p.cash < G.upgradeCost(index) ? 'Liquidità insufficiente per l’upgrade.' : `Con l’upgrade incassi ${G.euro(s.rent * 3)} per visita.`));
+      $('properties-list').append(row);
+    });
+  }
+
+  function openRename(index) {
+    if (busy) return;
+    renamePlayer = index;
+    $('rename-input').value = state.players[index].name;
+    $('rename-error').textContent = '';
+    show('rename-dialog');
+    $('rename-input').select();
+  }
+
+  function openResult() {
+    const winners = state.result.winners.map(i => state.players[i].name).join(' e ');
+    $('result-title').textContent = state.result.winners.length > 1 ? `${winners}: vittoria condivisa!` : `${winners} conquista l’ufficio!`;
+    $('result-description').textContent = state.result.reason;
+    $('ranking-list').replaceChildren(...G.rankings(state).map((p, i) => {
+      const row = element('li');
+      row.append(element('span', '', `${i + 1}. ${p.name}${p.bankrupt ? ' · Bancarotta' : ''}`), element('strong', '', G.euro(p.worth)));
+      return row;
+    }));
+    show('result-dialog');
+  }
+
+  $('roll-dice').addEventListener('click', roll);
+  $('end-turn').addEventListener('click', () => apply(() => G.endTurn(state)));
+  $('confirm-buy').addEventListener('click', () => apply(() => G.purchase(state, true)));
+  $('decline-buy').addEventListener('click', () => apply(() => G.purchase(state, false)));
+  $('event-continue').addEventListener('click', () => apply(() => G.continueEvent(state)));
+  $('choice-dialog').addEventListener('cancel', event => { event.preventDefault(); apply(() => G.purchase(state, false)); });
+  $('event-dialog').addEventListener('cancel', event => event.preventDefault());
+  $('skip-meeting').addEventListener('click', () => apply(() => G.meeting(state, false)));
+  $('pay-meeting').addEventListener('click', () => apply(() => G.meeting(state, true)));
+  $('new-game').addEventListener('click', openSetup);
+  $('play-again').addEventListener('click', () => { close('result-dialog'); openSetup(); });
+  $('rules').addEventListener('click', () => show('rules-dialog'));
+  $('setup-form').addEventListener('submit', startGame);
+  $('close-setup').addEventListener('click', () => close('setup-dialog'));
+  $('setup-dialog').addEventListener('cancel', event => { if (!state) event.preventDefault(); });
+  $('add-player').addEventListener('click', () => { readSetupFields(); if (setupNames.length < 4) { setupNames.push(`Collega ${setupNames.length + 1}`); renderSetupFields(); } });
+  $('remove-player').addEventListener('click', () => { readSetupFields(); if (setupNames.length > 2) { setupNames.pop(); renderSetupFields(); } });
+  $('zoom-board').addEventListener('click', () => {
+    const zoomed = $('board-wrap').classList.toggle('zoomed');
+    $('zoom-board').textContent = zoomed ? 'Mostra tutto il tabellone' : 'Ingrandisci tabellone';
+    $('zoom-board').setAttribute('aria-pressed', String(zoomed));
+    if (zoomed && state) {
+      const target = tiles[state.players[state.current].pos].node;
+      $('board-wrap').scrollLeft = Math.max(0, target.offsetLeft - $('board-wrap').clientWidth / 2);
+      $('board-wrap').scrollTop = Math.max(0, target.offsetTop - $('board-wrap').clientHeight / 2);
+    }
+  });
+  $('manage-properties').addEventListener('click', () => { renderProperties(); $('property-feedback').textContent = ''; show('properties-dialog'); });
+  $('confirm-sell').addEventListener('click', () => {
+    const index = sellIndex;
+    if (index === null) return;
+    sellIndex = null;
+    apply(() => G.sell(state, index), { focus: false });
+    close('sell-dialog');
+    renderProperties();
+    $('property-feedback').textContent = `${G.spaces[index].name} venduta. Liquidità ${G.euro(state.players[state.current].cash)}.`;
+    $('properties-dialog').querySelector('.icon-button').focus({ preventScroll: true });
+  });
+  $('rename-form').addEventListener('submit', event => {
+    event.preventDefault();
+    if (!G.rename(state, renamePlayer, $('rename-input').value)) { $('rename-error').textContent = 'Inserisci un nome diverso da quello degli altri colleghi.'; return; }
+    close('rename-dialog');
+    save();
+    render();
+    if (state.phase === 'gameover') resultShown = false;
+    syncDialogs();
+    if (!document.querySelector('dialog[open]')) focusAction();
+  });
+  document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => close(button.dataset.close)));
+
+  buildBoard();
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      state = G.restore(saved);
+      $('save-status').textContent = state ? 'Partita ripresa · salvataggio automatico' : 'Salvataggio non valido. Inizia una nuova partita.';
+      if (!state) $('save-status').className = 'save-error';
+    }
+  } catch {
+    $('save-status').textContent = 'Salvataggio non disponibile su questo browser.';
+    $('save-status').className = 'save-error';
+  }
+  render();
+  if (state) syncDialogs(); else openSetup();
+})();
